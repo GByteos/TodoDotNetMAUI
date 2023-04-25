@@ -6,9 +6,11 @@ namespace Todo.ViewModels;
 
 public partial class MainViewModel : ObservableObject
 {
-    public MainViewModel()
+    IConnectivity connectivity;
+    public MainViewModel(IConnectivity connectivity)
     {
         Items = new();
+        this.connectivity = connectivity;
     }
 
     [ObservableProperty]
@@ -18,10 +20,17 @@ public partial class MainViewModel : ObservableObject
     string inputText;
 
     [RelayCommand]
-    void Add()
+    async Task Add()
     {
         if (string.IsNullOrWhiteSpace(InputText))
             return;
+
+        if(connectivity.NetworkAccess != NetworkAccess.Internet)
+        {
+            await Shell.Current.DisplayAlert("Uh Oh!", "No Internet...", "OK");
+            return;
+        }
+
         // add our item
         Items.Add(InputText);
         InputText = string.Empty;
